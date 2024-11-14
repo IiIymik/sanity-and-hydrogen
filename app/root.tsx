@@ -16,7 +16,8 @@ import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import {PageLayout} from '~/components/PageLayout';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
-
+import tailwindCss from './styles/tailwind.css?url';
+import {VisualEditing} from 'hydrogen-sanity/visual-editing';
 export type RootLoader = typeof loader;
 
 /**
@@ -39,6 +40,7 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({
 
 export function links() {
   return [
+    {rel: 'stylesheet', href: tailwindCss},
     {rel: 'stylesheet', href: resetStyles},
     {rel: 'stylesheet', href: appStyles},
     {
@@ -61,7 +63,7 @@ export async function loader(args: LoaderFunctionArgs) {
   const criticalData = await loadCriticalData(args);
 
   const {storefront, env} = args.context;
-
+  console.log(storefront.sanity);
   return defer({
     ...deferredData,
     ...criticalData,
@@ -78,6 +80,7 @@ export async function loader(args: LoaderFunctionArgs) {
       country: args.context.storefront.i18n.country,
       language: args.context.storefront.i18n.language,
     },
+    preview: args.context.sanity.preview,
   });
 }
 
@@ -132,7 +135,7 @@ function loadDeferredData({context}: LoaderFunctionArgs) {
 export function Layout({children}: {children?: React.ReactNode}) {
   const nonce = useNonce();
   const data = useRouteLoaderData<RootLoader>('root');
-
+  console.log(data);
   return (
     <html lang="en">
       <head>
@@ -153,6 +156,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
         ) : (
           children
         )}
+        {data.preview ? <VisualEditing /> : null}
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
       </body>
